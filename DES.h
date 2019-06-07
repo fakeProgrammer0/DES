@@ -22,12 +22,12 @@ private:
 	trans_table P_table;
 	array<trans_table, S_tables_size> S_tables;
 
-	// static const size_t S_tables_size = 8;
 	static const size_t S_table_width = 16;
 	static const size_t S_table_height = 4;
 	static const size_t S_table_index_size = 6;
 
 	void read_tables();
+    void codec_block(des_block& block_bits, const array<iter_key, DES_ITERATION> &keys);
 	void codec_EBC(istream&in, ostream& out, const array<iter_key, DES_ITERATION>& keys);
 
 public:

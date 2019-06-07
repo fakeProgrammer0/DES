@@ -33,7 +33,7 @@ void test_codec()
 {
     des_key key_bits;
     stringstream in_key("1000001010010110010010001100010000111000001100000011100001100100");
-    read_bitstring(in_key, key_bits);
+    IOAdapter::read_bits(in_key, key_bits);
     DES_codec des_codec(key_bits);
 
     stringstream in("0000000000000000000000000000000000000000000000000000000000000000");
@@ -91,12 +91,12 @@ void test_diff_keys()
 {
     des_key key1;
     stringstream in_key1("0000001010010110010010001100010000111000001100000011100001100100");
-    read_bitstring(in_key1, key1);
+    IOAdapter::read_bits(in_key1, key1);
     DES_codec des_codec1(key1);
 
     des_key key2;
     stringstream in_key2("1000001010010110010010001100010000111000001100000011100001100100");
-    read_bitstring(in_key2, key2);
+    IOAdapter::read_bits(in_key2, key2);
     DES_codec des_codec2(key2);
 
     count_diff_bits(key1.to_string(), key2.to_string());
@@ -120,7 +120,7 @@ void test_diff_messages()
 {
     des_key key;
     stringstream in_key("0000001010010110010010001100010000111000001100000011100001100100");
-    read_bitstring(in_key, key);
+    IOAdapter::read_bits(in_key, key);
 
     DES_codec des_codec1(key);
     DES_codec des_codec2(key);
@@ -259,10 +259,9 @@ int main()
     //test_rnd_codec();
     //test_diff_keys();
     //test_diff_messages();
-    //test_DES_EBC_multi_blocks();
-    //test_DES_CBC_multi_blocks();
-    compare_DES_EBC_CBC();
-    system("pause");
+//    test_DES_EBC_multi_blocks();
+    test_DES_CBC_multi_blocks();
+//    compare_DES_EBC_CBC();
     return 0;
 }
 

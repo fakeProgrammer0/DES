@@ -4,19 +4,6 @@
 
 #include "IOAdapter.h"
 
-ifstream IOAdapter::get_data_ifstream(const char *table_file)
-{
-    string file(DATA_DIR);
-    file += table_file;
-    ifstream in(file, ios::in);
-    if (!in.is_open())
-    {
-        cerr << "cannot open file: " << file << endl;
-        exit(1);
-    }
-    return in;
-}
-
 // 读表, 留意 1-based index -> 0-based index
 void IOAdapter::read_trans_table(trans_table &table, const char *table_file)
 {

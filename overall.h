@@ -62,9 +62,4 @@ extern const char * DATA_DIR;
 
 typedef vector<int> trans_table;
 
-
-
-void read_bitstring(istream & in, des_block & bits);
-void write_bitstring(ostream & out, des_block & bits);
-
 #endif
