@@ -6,8 +6,6 @@
 #include "overall.h"
 #include "KeyGenerator.h"
 
-#define S_tables_size 8
-
 class DES_codec
 {
 private:

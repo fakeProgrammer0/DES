@@ -4,45 +4,25 @@
 
 #include "KeyGenerator.h"
 
-/*
-KeyGenerator::KeyGenerator(unsigned long key)
+KeyGenerator::KeyGenerator(des_key key) :
+        key(key)
 {
-	this->key = key;
-	trans_select1();
-	gen_iter_keys();
-}
-*/
-
-KeyGenerator::KeyGenerator(des_key key)
-{
-    this->key = key;
     trans_select1();
     gen_iter_keys();
 }
 
-KeyGenerator::~KeyGenerator()
-{
-
-}
-
-
 void KeyGenerator::trans_select1()
 {
-    ifstream* in_table1 = get_data_ifstream(trans_select_table1_file);
-    trans_table* trans_select_table1 = read_trans_table(*in_table1);
-    delete in_table1;
+    ifstream in_table1 = IOAdapter::get_data_ifstream(trans_select_table1_file);
+    trans_table trans_select_table1;
+    IOAdapter::read_trans_table(trans_select_table1, in_table1);
 
-    for (int i = 0; i < HALF_KEY_SIZE; i++)
-    {
-        key_c[i] = key[(*trans_select_table1)[i]];
-    }
+    int j = 0;
+    for (int i = 0; i < HALF_KEY_LEN; i++, j++)
+        key_c[i] = key[trans_select_table1[j]];
 
-    for (int i = 0; i < HALF_KEY_SIZE; i++)
-    {
-        key_d[i] = key[(*trans_select_table1)[i + HALF_KEY_SIZE]];
-    }
-
-    delete trans_select_table1;
+    for (int i = 0; i < HALF_KEY_LEN; i++)
+        key_d[i] = key[trans_select_table1[j]];
 
     /*
     for (size_t i = 0; i < key.size(); i++)
@@ -71,21 +51,21 @@ void KeyGenerator::trans_select1()
     */
 }
 
-void KeyGenerator::loop_left_shift(key_half& k, int n)
+void KeyGenerator::loop_left_shift(key_half &k, int n)
 {
-    //k = k << n | k >> (HALF_KEY_SIZE - n);
-    k = k >> n | k << (HALF_KEY_SIZE - n); // little endian 的循环右移相当于big endian的循环左移
+    //k = k << n | k >> (HALF_KEY_LEN - n);
+    k = k >> n | k << (HALF_KEY_LEN - n); // little endian 的循环右移相当于big endian的循环左移
 }
 
 void KeyGenerator::gen_iter_keys()
 {
-    ifstream* in_table2 = get_data_ifstream(trans_select_table2_file);
-    trans_table* trans_select_table2 = read_trans_table(*in_table2);
-    delete in_table2;
+    ifstream in_table2 = IOAdapter::get_data_ifstream(trans_select_table2_file);
+    trans_table trans_select_table2;
+    IOAdapter::read_trans_table(trans_select_table2, in_table2);
 
     /*
     for(size_t idx = 0; idx < DES_ITERATION; idx++)
-        cout << idx << "\t" << SHL_bit_cnts[idx] << endl;
+        cout << idx << "\t" << SHL_bit_counts[idx] << endl;
     cout << endl;
     */
 
@@ -94,16 +74,16 @@ void KeyGenerator::gen_iter_keys()
         // cout << "key_c: " << key_c << endl;
         // cout << "key_d: " << key_d << endl << endl;
 
-        loop_left_shift(key_c, SHL_bit_cnts[i]);
-        loop_left_shift(key_d, SHL_bit_cnts[i]);
+        loop_left_shift(key_c, SHL_bit_counts[i]);
+        loop_left_shift(key_d, SHL_bit_counts[i]);
 
-        iter_key& k = iter_keys[i];
+        iter_key &k = iter_keys[i];
 
         size_t j = 0;
         for (; j < ITER_KEY_LEN / 2; j++)
-            k[j] = key_c[(*trans_select_table2)[j]];
+            k[j] = key_c[trans_select_table2[j]];
         for (; j < ITER_KEY_LEN; j++)
-            k[j] = key_d[(*trans_select_table2)[j] - HALF_KEY_SIZE];
+            k[j] = key_d[trans_select_table2[j] - HALF_KEY_LEN];
 
         /*
         cout << "key_c: " << endl;
@@ -134,14 +114,5 @@ void KeyGenerator::gen_iter_keys()
         cout << endl;
         */
     }
-    delete trans_select_table2;
 }
-
-array<iter_key, DES_ITERATION> KeyGenerator::get_iter_keys() const
-{
-    return iter_keys;
-}
-
-
-
 

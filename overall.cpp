@@ -1,6 +1,7 @@
 
-#include <string.h>
 #include "overall.h"
+
+const char * DATA_DIR = "..\\data\\";
 
 ifstream* get_data_ifstream(const char* table_file)
 {
