@@ -14,7 +14,9 @@ private:
     des_key key;
     key_half key_c;
     key_half key_d;
-    array<iter_key, DES_ITERATION> iter_keys;
+
+    array<iter_key, DES_ITERATION> encrypt_keys;
+    array<iter_key, DES_ITERATION> decrypt_keys;
 
     // loop left shift bit counts
     const int SHL_bit_counts[DES_ITERATION]
@@ -32,10 +34,8 @@ private:
 public:
     explicit KeyGenerator(des_key key);
 
-    array<iter_key, DES_ITERATION> get_iter_keys() const
-    {
-        return iter_keys;
-    }
+    const array<iter_key, DES_ITERATION> &get_encrypt_keys() const;
+    const array<iter_key, DES_ITERATION> &get_decrypt_keys() const;
 
 };
 

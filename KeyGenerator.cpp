@@ -13,9 +13,8 @@ KeyGenerator::KeyGenerator(des_key key) :
 
 void KeyGenerator::trans_select1()
 {
-    ifstream in_table1 = IOAdapter::get_data_ifstream(trans_select_table1_file);
     trans_table trans_select_table1;
-    IOAdapter::read_trans_table(trans_select_table1, in_table1);
+    IOAdapter::read_trans_table(trans_select_table1, trans_select_table1_file);
 
     int j = 0;
     for (int i = 0; i < HALF_KEY_LEN; i++, j++)
@@ -59,9 +58,8 @@ void KeyGenerator::loop_left_shift(key_half &k, int n)
 
 void KeyGenerator::gen_iter_keys()
 {
-    ifstream in_table2 = IOAdapter::get_data_ifstream(trans_select_table2_file);
     trans_table trans_select_table2;
-    IOAdapter::read_trans_table(trans_select_table2, in_table2);
+    IOAdapter::read_trans_table(trans_select_table2, trans_select_table2_file);
 
     /*
     for(size_t idx = 0; idx < DES_ITERATION; idx++)
@@ -77,13 +75,15 @@ void KeyGenerator::gen_iter_keys()
         loop_left_shift(key_c, SHL_bit_counts[i]);
         loop_left_shift(key_d, SHL_bit_counts[i]);
 
-        iter_key &k = iter_keys[i];
+        iter_key& k = encrypt_keys[i];
 
         size_t j = 0;
         for (; j < ITER_KEY_LEN / 2; j++)
             k[j] = key_c[trans_select_table2[j]];
         for (; j < ITER_KEY_LEN; j++)
             k[j] = key_d[trans_select_table2[j] - HALF_KEY_LEN];
+
+        decrypt_keys[DES_ITERATION - 1 - i] = k;
 
         /*
         cout << "key_c: " << endl;
@@ -114,5 +114,15 @@ void KeyGenerator::gen_iter_keys()
         cout << endl;
         */
     }
+}
+
+const array<iter_key, DES_ITERATION> &KeyGenerator::get_encrypt_keys() const
+{
+    return encrypt_keys;
+}
+
+const array<iter_key, DES_ITERATION> &KeyGenerator::get_decrypt_keys() const
+{
+    return decrypt_keys;
 }
 

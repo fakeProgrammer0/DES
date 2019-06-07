@@ -14,7 +14,7 @@ private:
 public:
 
     static ifstream get_data_ifstream(const char* table_file);
-    static void read_trans_table(trans_table& table, ifstream& in);
+    static void read_trans_table(trans_table& table, const char* table_file);
 
     static void read_bits(istream &in, des_block &bits);
     static void write_bits(ostream &out, des_block &bits);

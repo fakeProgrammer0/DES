@@ -64,9 +64,6 @@ typedef vector<int> trans_table;
 
 
 
-trans_table* read_trans_table(ifstream& in);
-ifstream* get_data_ifstream(const char*);
-
 void read_bitstring(istream & in, des_block & bits);
 void write_bitstring(ostream & out, des_block & bits);
 

@@ -18,8 +18,17 @@ ifstream IOAdapter::get_data_ifstream(const char *table_file)
 }
 
 // 读表, 留意 1-based index -> 0-based index
-void IOAdapter::read_trans_table(trans_table &table, ifstream &in)
+void IOAdapter::read_trans_table(trans_table &table, const char *table_file)
 {
+    string file(DATA_DIR);
+    file += table_file;
+    ifstream in(file, ios::in);
+    if (!in.is_open())
+    {
+        cerr << "cannot open file: " << file << endl;
+        exit(1);
+    }
+
     int i;
     while (!in.eof())
     {
@@ -52,6 +61,8 @@ void IOAdapter::write_bits(ostream &out, des_block &bits)
         out << bits[i];
     }
 }
+
+
 
 
 
