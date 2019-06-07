@@ -58,7 +58,7 @@ typedef bitset<TEMP_BLOCK_SIZE> des_temp_block;
 // data: transpose tables & select boxes
 extern const char * DATA_DIR;
 
-#define S_tables_size 8
+#define S_TABLES_COUNT 8
 
 typedef vector<int> trans_table;
 

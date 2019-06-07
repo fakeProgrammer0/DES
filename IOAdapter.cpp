@@ -28,6 +28,7 @@ void IOAdapter::read_trans_table(trans_table &table, const char *table_file)
 
 void IOAdapter::read_bits(istream &in, des_block &bits)
 {
+    bits.reset();
     for (size_t i = 0; i < bits.size() && !in.eof(); i++)
     {
         char c;

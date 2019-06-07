@@ -39,7 +39,7 @@ void DES_codec::codec_block(des_block& block_bits, const array<iter_key, DES_ITE
 
         des_half_block replace;
         size_t j = 0, k = 0;
-        for (size_t s = 0; s < S_tables_size; s++)
+        for (size_t s = 0; s < S_TABLES_COUNT; s++)
         {
             size_t row = ext[j] * 2 + ext[j + 1];
             j += 2;

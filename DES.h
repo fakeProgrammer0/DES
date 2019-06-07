@@ -20,7 +20,7 @@ private:
 	trans_table inverse_IP_table;
 	trans_table E_table;
 	trans_table P_table;
-	array<trans_table, S_tables_size> S_tables;
+	array<trans_table, S_TABLES_COUNT> S_tables;
 
 	static const size_t S_table_width = 16;
 	static const size_t S_table_height = 4;
