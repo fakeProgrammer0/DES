@@ -6,7 +6,7 @@
 #include "overall.h"
 #include "KeyGenerator.h"
 
-class DES_codec
+class DES_Codec
 {
 private:
 	KeyGenerator keyGen;
@@ -31,7 +31,7 @@ private:
 	void codec_EBC(istream&in, ostream& out, const array<iter_key, DES_ITERATION>& keys);
 
 public:
-	explicit DES_codec(des_key key);
+	explicit DES_Codec(des_key key);
 
 	void encrypt_EBC(istream& in, ostream& out)
 	{

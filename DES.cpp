@@ -1,12 +1,12 @@
 #include "DES.h"
 
-DES_codec::DES_codec(des_key key)
+DES_Codec::DES_Codec(des_key key)
         : keyGen(key)
 {
     read_tables();
 }
 
-void DES_codec::read_tables()
+void DES_Codec::read_tables()
 {
     IOAdapter::read_trans_table(IP_table, IP_file);
     IOAdapter::read_trans_table(inverse_IP_table, inverse_IP_file);
@@ -21,7 +21,7 @@ void DES_codec::read_tables()
     }
 }
 
-void DES_codec::codec_block(des_block& block_bits, const array<iter_key, DES_ITERATION> &keys)
+void DES_Codec::codec_block(des_block& block_bits, const array<iter_key, DES_ITERATION> &keys)
 {
     des_half_block L, R;
     for (size_t i = 0; i < L.size(); i++)
@@ -74,7 +74,7 @@ void DES_codec::codec_block(des_block& block_bits, const array<iter_key, DES_ITE
         block_bits[i] = temp_block[inverse_IP_table[i]];
 }
 
-void DES_codec::codec_EBC(istream &in, ostream &out, const array<iter_key, DES_ITERATION> &keys)
+void DES_Codec::codec_EBC(istream &in, ostream &out, const array<iter_key, DES_ITERATION> &keys)
 {
     while (in.peek() != EOF)
     {
@@ -87,7 +87,7 @@ void DES_codec::codec_EBC(istream &in, ostream &out, const array<iter_key, DES_I
     }
 }
 
-void DES_codec::encrypt_CBC(istream &in, ostream &out)
+void DES_Codec::encrypt_CBC(istream &in, ostream &out)
 {
     const array<iter_key, DES_ITERATION> &keys = keyGen.get_encrypt_keys();
     des_block init_vector;
@@ -105,7 +105,7 @@ void DES_codec::encrypt_CBC(istream &in, ostream &out)
     }
 }
 
-void DES_codec::decrypt_CBC(istream &in, ostream &out)
+void DES_Codec::decrypt_CBC(istream &in, ostream &out)
 {
     const array<iter_key, DES_ITERATION> &keys = keyGen.get_decrypt_keys();
     des_block SV, Next_SV;

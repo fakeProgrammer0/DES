@@ -8,13 +8,14 @@
 
 int main()
 {
-    test_codec();
-    //test_rnd_codec();
-    //test_diff_keys();
-    //test_diff_messages();
-//    test_DES_EBC_multi_blocks();
-//    test_DES_CBC_multi_blocks();
-//    compare_DES_EBC_CBC();
+//    test_codec();
+//    test_rnd_codec();
+//    test_diff_keys();
+//    test_diff_messages();
+//    test_DES_multi_blocks_EBC();
+//    test_DES_multi_blocks_CBC();
+//    cmp_DES_EBC_CBC();
+    cmp_diff_keys_EBC_CBC();
     return 0;
 }
 

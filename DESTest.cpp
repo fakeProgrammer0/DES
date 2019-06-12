@@ -2,11 +2,12 @@
 #include "DESTest.h"
 
 #include <random>
+#include <ctime>
 
 using std::default_random_engine;
 using std::uniform_int_distribution;
 
-size_t count_diff_bits(const string & bitstring1, const string& bitstring2)
+size_t count_diff_bits(const string &bitstring1, const string &bitstring2)
 {
     size_t diff_bits_count = 0;
     for (size_t i = 0; i < bitstring1.size() && i < bitstring2.size(); i++)
@@ -15,11 +16,11 @@ size_t count_diff_bits(const string & bitstring1, const string& bitstring2)
     return diff_bits_count;
 }
 
-size_t count_diff_bits(const string & bitstring1, const string& bitstring2, bool print_count_flag)
+size_t count_diff_bits(const string &bitstring1, const string &bitstring2, bool print_count_flag)
 {
     int diff_bits_count = count_diff_bits(bitstring1, bitstring2);
-    if(print_count_flag)
-        cout << "different bit count: " << diff_bits_count << endl;
+    if (print_count_flag)
+        cout << "different bits count: " << diff_bits_count << endl;
     return diff_bits_count;
 }
 
@@ -28,7 +29,7 @@ void test_codec()
     des_key key_bits;
     stringstream key_stream("1000001010010110010010001100010000111000001100000011100001100100");
     IOAdapter::read_bits(key_stream, key_bits);
-    DES_codec des_codec(key_bits);
+    DES_Codec des_codec(key_bits);
 
     stringstream message("0000000000000000000000000000000000000000000000000000000000000000");
     stringstream secret;
@@ -37,213 +38,304 @@ void test_codec()
     stringstream decode_secret;
     des_codec.decrypt_EBC(secret, decode_secret);
 
-    cout << "          key: " << key_bits.to_string() << endl << endl;
+    cout << "          key: " << key_bits.to_string() << endl;
     cout << "      message: " << message.str() << endl;
-    cout << "decode_secret: " << decode_secret.str() << endl;
-    cout << "       secret: " << secret.str() << endl << endl;
+    cout << "       secret: " << secret.str() << endl;
+    cout << "decode_secret: " << decode_secret.str() << endl << endl;
 
     count_diff_bits(message.str(), decode_secret.str(), true);
 }
 
 void test_rnd_codec()
 {
-    default_random_engine rnd_engine;
+    default_random_engine rnd_engine(time(0));
     uniform_int_distribution<unsigned long> u_dis;
-    const size_t N = 10;
+    const size_t N = 1000;
     for (size_t i = 0; i < N; i++)
     {
         unsigned long rnd_key = u_dis(rnd_engine);
         des_key key_bits(rnd_key);
-        DES_codec des_codec(key_bits);
+        DES_Codec des_codec(key_bits);
 
         unsigned long rnd_block = u_dis(rnd_engine);
         des_block block_bits(rnd_block);
-        stringstream in(block_bits.to_string());
+        stringstream message(block_bits.to_string());
 
-        stringstream out;
-        des_codec.encrypt_EBC(in, out);
+        stringstream secret;
+        des_codec.encrypt_EBC(message, secret);
 
-        stringstream out2;
-        des_codec.decrypt_EBC(out, out2);
+        stringstream decode_secret;
+        des_codec.decrypt_EBC(secret, decode_secret);
 
-        cout << "message: " << in.str() << endl;
-        cout << "desecret:" << out2.str() << endl;
-        cout << " secret: " << out.str() << endl << endl;
+        cout << "          key: " << key_bits.to_string() << endl;
+        cout << "      message: " << message.str() << endl;
+        cout << "       secret: " << secret.str() << endl;
+        cout << "decode_secret: " << decode_secret.str() << endl << endl;
 
-        int diff_bits_count = count_diff_bits(in.str(), out2.str());
+        int diff_bits_count = count_diff_bits(message.str(), decode_secret.str());
         if (diff_bits_count != 0)
         {
-            cout << "i: " << i << endl;
-            cout << "message: " << in.str() << endl;
-            cout << " secret: " << out.str() << endl;
-            cout << "desecret:" << out2.str() << endl;
-            cout << "diff bits count: " << diff_bits_count << endl << endl;
+            cout << "Decode secret isn't equal to the original message!!!!!" << endl;
+            cout << "          key: " << key_bits.to_string() << endl;
+            cout << "      message: " << message.str() << endl;
+            cout << "       secret: " << secret.str() << endl;
+            cout << "decode_secret: " << decode_secret.str() << endl << endl;
+            exit(1);
         }
     }
+    cout << "All decode secrets are the same as the original message!" << endl;
 }
 
 void test_diff_keys()
 {
     des_key key1;
-    stringstream in_key1("0000001010010110010010001100010000111000001100000011100001100100");
-    IOAdapter::read_bits(in_key1, key1);
-    DES_codec des_codec1(key1);
+    stringstream key1_stream("1110001011110110110111100011000000111010000010000110001011011100");
+    IOAdapter::read_bits(key1_stream, key1);
+    DES_Codec des_codec1(key1);
 
     des_key key2;
-    stringstream in_key2("1000001010010110010010001100010000111000001100000011100001100100");
-    IOAdapter::read_bits(in_key2, key2);
-    DES_codec des_codec2(key2);
+    stringstream key2_stream("0110001011110110110111100011000000111010000010000110001011011100");
+    IOAdapter::read_bits(key2_stream, key2);
+    DES_Codec des_codec2(key2);
 
-    count_diff_bits(key1.to_string(), key2.to_string());
+    stringstream message1("0110100010000101001011110111101000010011011101101110101110100100");
+    stringstream message2(message1.str());
 
-    stringstream in1("0000000000000000000000000000000000000000000000000000000000000000");
-    stringstream in2("0000000000000000000000000000000000000000000000000000000000000000");
+    stringstream secret1;
+    des_codec1.encrypt_EBC(message1, secret1);
 
-    stringstream out1;
-    des_codec1.encrypt_EBC(in1, out1);
+    stringstream secret2;
+    des_codec2.encrypt_EBC(message2, secret2);
 
-    stringstream out2;
-    des_codec2.encrypt_EBC(in2, out2);
+    // 别直接输出 key1 或 key2，little-endian 会颠倒顺序的
+//    cout << "    key1: " << key1.to_string() << endl;
+//    cout << "    key2: " << key2.to_string() << endl;
+//    count_diff_bits(key1.to_string(), key2.to_string(), true);
 
-    cout << "out1: " << out1.str() << endl;
-    cout << "out2: " << out2.str() << endl;
+    cout << "    key1: " << key1_stream.str() << endl;
+    cout << "    key2: " << key2_stream.str() << endl;
+    count_diff_bits(key1_stream.str(), key2_stream.str(), true);
+    cout << endl;
 
-    count_diff_bits(out1.str(), out2.str());
+    cout << "message1: " << message1.str() << endl;
+    cout << "message2: " << message2.str() << endl;
+    count_diff_bits(message1.str(), message2.str(), true);
+    cout << endl;
+
+    cout << " secret1: " << secret1.str() << endl;
+    cout << " secret2: " << secret2.str() << endl;
+    count_diff_bits(secret1.str(), secret2.str(), true);
 }
 
 void test_diff_messages()
 {
     des_key key;
-    stringstream in_key("0000001010010110010010001100010000111000001100000011100001100100");
-    IOAdapter::read_bits(in_key, key);
+    stringstream key_stream("0000001010010110010010001100010000111000001100000011100001100100");
+    IOAdapter::read_bits(key_stream, key);
 
-    DES_codec des_codec1(key);
-    DES_codec des_codec2(key);
+    DES_Codec des_codec1(key);
+    DES_Codec des_codec2(key);
 
-    stringstream in1("0000000000000000000000000000000000000000000000000000000000000000");
-    stringstream in2("1000000000000000000000000000000000000000000000000000000000000000");
+    stringstream message1("0000000000000000000000000000000000000000000000000000000000000000");
+    stringstream message2("1000000000000000000000000000000000000000000000000000000000000000");
 
-    stringstream out1;
-    des_codec1.encrypt_EBC(in1, out1);
+    stringstream secret1;
+    des_codec1.encrypt_EBC(message1, secret1);
 
-    stringstream out2;
-    des_codec2.encrypt_EBC(in2, out2);
+    stringstream secret2;
+    des_codec2.encrypt_EBC(message2, secret2);
 
-    cout << "out1: " << out1.str() << endl;
-    cout << "out2: " << out2.str() << endl;
+    cout << "     key: " << key_stream.str() << endl;
+    cout << endl;
 
-    count_diff_bits(out1.str(), out2.str());
+    cout << "message1: " << message1.str() << endl;
+    cout << "message2: " << message2.str() << endl;
+    count_diff_bits(message1.str(), message2.str(), true);
+    cout << endl;
+
+    cout << " secret1: " << secret1.str() << endl;
+    cout << " secret2: " << secret2.str() << endl;
+
+    count_diff_bits(secret1.str(), secret2.str(), true);
 }
 
-void test_DES_EBC_multi_blocks()
+void test_DES_multi_blocks_EBC()
 {
     default_random_engine rnd_engine;
     uniform_int_distribution<unsigned long> u_dis;
 
     unsigned long rnd_key = u_dis(rnd_engine);
     des_key key_bits(rnd_key);
-    DES_codec des_codec(key_bits);
+    DES_Codec des_codec(key_bits);
 
-    stringstream in;
-    const size_t N = 10;
+    stringstream message;
+    const size_t N = 5;
     for (size_t i = 0; i < N; i++)
     {
         unsigned long rnd_block = u_dis(rnd_engine);
         des_block block_bits(rnd_block);
-        in << block_bits.to_string();
+        message << block_bits.to_string();
     }
 
-    stringstream out;
-    des_codec.encrypt_EBC(in, out);
+    stringstream secret;
+    des_codec.encrypt_EBC(message, secret);
 
-    stringstream out2;
-    des_codec.decrypt_EBC(out, out2);
+    stringstream decode_secret;
+    des_codec.decrypt_EBC(secret, decode_secret);
 
-    cout << "message: " << in.str() << endl << endl;
-    cout << "desecret:" << out2.str() << endl << endl;
-    cout << " secret: " << out.str() << endl << endl;
 
-    int diff_bits_count = count_diff_bits(in.str(), out2.str());
-    cout << "diff bits count: " << diff_bits_count << endl << endl;
+    cout << "key: ";
+    IOAdapter::write_bits(cout, key_bits);
+    cout << endl;
 
+    cout << "message: \n" << message.str() << endl << endl;
+    cout << "secret: \n" << secret.str() << endl << endl;
+    cout << "decode_secret: \n" << decode_secret.str() << endl << endl;
+
+    count_diff_bits(message.str(), decode_secret.str(), true);
 }
 
-void test_DES_CBC_multi_blocks()
+void test_DES_multi_blocks_CBC()
 {
     default_random_engine rnd_engine;
     uniform_int_distribution<unsigned long> u_dis;
 
     unsigned long rnd_key = u_dis(rnd_engine);
     des_key key_bits(rnd_key);
-    DES_codec des_codec(key_bits);
+    DES_Codec des_codec(key_bits);
 
-    stringstream in;
-    const size_t N = 10;
+    stringstream message;
+    const size_t N = 5;
     for (size_t i = 0; i < N; i++)
     {
         unsigned long rnd_block = u_dis(rnd_engine);
         des_block block_bits(rnd_block);
-        in << block_bits.to_string();
+        message << block_bits.to_string();
     }
 
-    stringstream out;
-    des_codec.encrypt_CBC(in, out);
+    stringstream secret;
+    des_codec.encrypt_CBC(message, secret);
 
-    stringstream out2;
-    des_codec.decrypt_CBC(out, out2);
+    stringstream decode_secret;
+    des_codec.decrypt_CBC(secret, decode_secret);
 
-    cout << "message: " << in.str() << endl << endl;
-    cout << "desecret:" << out2.str() << endl << endl;
-    cout << " secret: " << out.str() << endl << endl;
+    cout << "key: ";
+    IOAdapter::write_bits(cout, key_bits);
+    cout << endl;
 
-    int diff_bits_count = count_diff_bits(in.str(), out2.str());
-    cout << "diff bits count: " << diff_bits_count << endl << endl;
+    cout << "message: \n" << message.str() << endl << endl;
+    cout << "secret: \n" << secret.str() << endl << endl;
+    cout << "decode_secret: \n" << decode_secret.str() << endl << endl;
 
+    count_diff_bits(message.str(), decode_secret.str(), true);
 }
 
-void compare_DES_EBC_CBC()
+void cmp_DES_EBC_CBC()
 {
     default_random_engine rnd_engine;
     uniform_int_distribution<unsigned long> u_dis;
 
     unsigned long rnd_key = u_dis(rnd_engine);
     des_key key_bits(rnd_key);
-    DES_codec des_codec(key_bits);
+    DES_Codec des_codec(key_bits);
 
-    stringstream in1;
-    stringstream in2;
-    const size_t N = 10;
+    stringstream message1;
+    const size_t N = 5;
     for (size_t i = 0; i < N; i++)
     {
         unsigned long rnd_block = u_dis(rnd_engine);
         des_block block_bits(rnd_block);
-        in1 << block_bits.to_string();
-        in2 << block_bits.to_string();
+        message1 << block_bits.to_string();
+    }
+    stringstream message2(message1.str());
+
+    stringstream EBC_secret;
+    des_codec.encrypt_EBC(message1, EBC_secret);
+
+    stringstream CBC_secret;
+    des_codec.encrypt_CBC(message2, CBC_secret);
+
+    cout << "key: ";
+    IOAdapter::write_bits(cout, key_bits);
+    cout << endl << endl;
+    cout << "message: \n" << message1.str() << endl << endl;
+    cout << "EBC_secret:\n" << EBC_secret.str() << endl << endl;
+    cout << "CBC_secret:\n" << CBC_secret.str() << endl << endl;
+
+    count_diff_bits(EBC_secret.str(), CBC_secret.str(), true);
+    cout << endl;
+
+    stringstream EBC_decode_secret;
+    des_codec.decrypt_EBC(EBC_secret, EBC_decode_secret);
+
+    stringstream CBC_decode_secret;
+    des_codec.decrypt_CBC(CBC_secret, CBC_decode_secret);
+
+    cout << "EBC_decode_secret: \n" << EBC_decode_secret.str() << endl << endl;
+    cout << "CBC_decode_secret: \n" << CBC_decode_secret.str() << endl << endl;
+    count_diff_bits(EBC_decode_secret.str(), CBC_decode_secret.str(), true);
+    cout << endl;
+}
+
+void cmp_diff_keys_EBC_CBC()
+{
+    const size_t BLOCK_COUNT = 5;
+    const size_t MAX_EPOCH = 1000;
+
+    default_random_engine rnd_engine(time(NULL));
+    uniform_int_distribution<unsigned long> u_dis;
+    uniform_int_distribution<unsigned int> rnd_key_bit_idx_dis(0, BLOCK_SIZE - 1);
+
+    double EBC_diff_bits_count = 0;
+    double CBC_diff_bits_count = 0;
+
+    for (size_t epoch = 0; epoch < MAX_EPOCH; epoch++)
+    {
+        stringstream message;
+        for (size_t i = 0; i < BLOCK_COUNT; i++)
+        {
+            unsigned long rnd_block = u_dis(rnd_engine);
+            des_block block_bits(rnd_block);
+            message << block_bits.to_string();
+        }
+
+        unsigned long rnd_key = u_dis(rnd_engine);
+        des_key key1_bits(rnd_key);
+        DES_Codec des_codec1(key1_bits);
+
+        size_t rnd_flip_bit_idx = rnd_key_bit_idx_dis(rnd_engine);
+        des_key key2_bits = key1_bits;
+        key2_bits.flip(rnd_flip_bit_idx);
+        DES_Codec des_codec2(key2_bits);
+
+        if (count_diff_bits(key1_bits.to_string(), key2_bits.to_string()) != 1)
+            cout << "error";
+
+        stringstream EBC_secret1;
+        stringstream message1(message.str());
+        des_codec1.encrypt_EBC(message1, EBC_secret1);
+
+        stringstream EBC_secret2;
+        stringstream message2(message.str());
+        des_codec2.encrypt_EBC(message2, EBC_secret2);
+
+        EBC_diff_bits_count += count_diff_bits(EBC_secret1.str(), EBC_secret2.str());
+
+        stringstream CBC_secret1;
+        stringstream message3(message.str());
+        des_codec1.encrypt_CBC(message3, CBC_secret1);
+
+        stringstream CBC_secret2;
+        stringstream message4(message.str());
+        des_codec2.encrypt_CBC(message4, CBC_secret2);
+
+        CBC_diff_bits_count += count_diff_bits(CBC_secret1.str(), CBC_secret2.str());
     }
 
-    stringstream out_EBC;
-    des_codec.encrypt_EBC(in1, out_EBC);
+    printf("total EBC_diff_bits_count: %.0f\n", EBC_diff_bits_count);
+    printf("total CBC_diff_bits_count: %.0f\n", CBC_diff_bits_count);
 
-    stringstream out_CBC;
-    des_codec.encrypt_CBC(in2, out_CBC);
-
-    cout << "message: " << in1.str() << endl << endl;
-    cout << "EBC_secret:" << out_EBC.str() << endl << endl;
-    cout << "CBC_secret: " << out_CBC.str() << endl << endl;
-
-    int diff_bits_count = count_diff_bits(out_EBC.str(), out_CBC.str());
-    cout << "diff bits count: " << diff_bits_count << endl << endl;
-
-    stringstream M_EBC;
-    des_codec.decrypt_EBC(out_EBC, M_EBC);
-
-    stringstream M_CBC;
-    des_codec.decrypt_CBC(out_CBC, M_CBC);
-
-    cout << "EBC_message: " << M_EBC.str() << endl << endl;
-    cout << "CBC_message: " << M_CBC.str() << endl << endl;
-
-    int diff_bits_count2 = count_diff_bits(M_EBC.str(), M_CBC.str());
-    cout << "diff bits count: " << diff_bits_count2 << endl << endl;
+    printf("average EBC_diff_bits_count: %.2f\n", EBC_diff_bits_count / MAX_EPOCH);
+    printf("average CBC_diff_bits_count: %.2f\n", CBC_diff_bits_count / MAX_EPOCH);
 }
 
