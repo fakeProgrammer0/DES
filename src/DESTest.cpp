@@ -308,8 +308,12 @@ void cmp_diff_keys_EBC_CBC()
         key2_bits.flip(rnd_flip_bit_idx);
         DES_Codec des_codec2(key2_bits);
 
-        if (count_diff_bits(key1_bits.to_string(), key2_bits.to_string()) != 1)
-            cout << "error";
+        if (count_diff_bits(key1_bits.to_string(), key2_bits.to_string()) != 1){
+            cerr << "error: key1 and key2 don't has 1 different bit" << endl;
+            cerr << "key1: " << key1_bits.to_string() << endl;
+            cerr << "key2: " << key2_bits.to_string() << endl << endl;
+            exit(1);
+        }
 
         stringstream EBC_secret1;
         stringstream message1(message.str());
@@ -332,10 +336,17 @@ void cmp_diff_keys_EBC_CBC()
         CBC_diff_bits_count += count_diff_bits(CBC_secret1.str(), CBC_secret2.str());
     }
 
-    printf("total EBC_diff_bits_count: %.0f\n", EBC_diff_bits_count);
-    printf("total CBC_diff_bits_count: %.0f\n", CBC_diff_bits_count);
+    double avg_EBC_diff_bits_count = EBC_diff_bits_count / MAX_EPOCH;
+    double avg_CBC_diff_bits_count = CBC_diff_bits_count / MAX_EPOCH;
 
-    printf("average EBC_diff_bits_count: %.2f\n", EBC_diff_bits_count / MAX_EPOCH);
-    printf("average CBC_diff_bits_count: %.2f\n", CBC_diff_bits_count / MAX_EPOCH);
+    double avg_EBC_diff_bits_percentage = avg_EBC_diff_bits_count / (BLOCK_SIZE * BLOCK_COUNT);
+    double avg_CBC_diff_bits_percentage = avg_CBC_diff_bits_count / (BLOCK_SIZE * BLOCK_COUNT);
+
+    printf("%d blocks, %d epoches\n", BLOCK_COUNT, MAX_EPOCH);
+
+    printf("average EBC_diff_bits_count: %.2f, %.2f%%\n",
+            avg_EBC_diff_bits_count, avg_EBC_diff_bits_percentage);
+    printf("average CBC_diff_bits_count: %.2f, %.2f%%\n",
+            avg_CBC_diff_bits_count, avg_CBC_diff_bits_percentage);
 }
 
